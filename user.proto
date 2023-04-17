@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+
+option go_package = "api/";
+
+package apiproto;
+
+message User{
+    string Name=1;
+    string Surname=2;
+  string Password=3;
+}
+
+message ResUser{
+    string Name=1;
+    string Surname=2;
+
+}
+message UserId{
+    string id=3;
+}
+  
+service UserService{
+     rpc CreateUser(User) returns (ResUser);
+     rpc GetUser(UserId) returns (ResUser);
+
+}
