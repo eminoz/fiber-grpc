@@ -8,7 +8,7 @@ package apiproto;
 message User{
     string Name=1;
     string Surname=2;
-  string Password=3;
+    string Password=3;
 }
 
 message ResUser{
@@ -19,9 +19,15 @@ message ResUser{
 message UserId{
     string id=3;
 }
+message DeleteUserRes{
+    bool isDeleted=1;
+    string msg=2;
+}
   
 service UserService{
      rpc CreateUser(User) returns (ResUser);
      rpc GetUser(UserId) returns (ResUser);
+     rpc DeleteUser(UserId) returns (DeleteUserRes);
+
 
 }

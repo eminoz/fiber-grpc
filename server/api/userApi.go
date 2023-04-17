@@ -28,3 +28,10 @@ func (u UserApi) GetUser(ctx context.Context, userId *api.UserId) (*api.ResUser,
 	res := u.userController.GetUserById(ctx, userId.Id)
 	return res, nil
 }
+func (u UserApi) DeleteUser(ctx context.Context, userId *api.UserId) (*api.DeleteUserRes, error) {
+	res, err := u.userController.DeleteUser(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

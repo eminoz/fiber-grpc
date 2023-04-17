@@ -9,6 +9,7 @@ import (
 type UserApi interface {
 	CreateUser(ctx *fiber.Ctx) error
 	GetUserById(ctx *fiber.Ctx) error
+	DeleteUserById(ctx *fiber.Ctx) error
 }
 type userApi struct {
 	userService service.UserService
@@ -21,12 +22,27 @@ func NewUserApi(us service.UserService) UserApi {
 func (u userApi) CreateUser(ctx *fiber.Ctx) error {
 	var usr api.User
 	ctx.BodyParser(&usr)
-	a := u.userService.CreateUser(&usr)
+	a, err := u.userService.CreateUser(&usr)
+	if err != nil {
+		return ctx.JSON(err)
+	}
 	return ctx.JSON(a)
 }
 func (u userApi) GetUserById(ctx *fiber.Ctx) error {
 	userID := ctx.Params("id")
 
-	userRes := u.userService.GetUserById(&api.UserId{Id: userID})
+	userRes, err := u.userService.GetUserById(&api.UserId{Id: userID})
+	if err != nil {
+		return ctx.JSON(err)
+	}
 	return ctx.JSON(userRes)
+}
+
+func (u userApi) DeleteUserById(ctx *fiber.Ctx) error {
+	userID := ctx.Params("id")
+	res, err := u.userService.DeleteUserById(&api.UserId{Id: userID})
+	if err != nil {
+		return ctx.JSON(err)
+	}
+	return ctx.JSON(res)
 }

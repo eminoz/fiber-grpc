@@ -11,8 +11,9 @@ import (
 )
 
 type UserService interface {
-	CreateUser(user *api.User) *api.ResUser
-	GetUserById(id *api.UserId) *api.ResUser
+	CreateUser(user *api.User) (*api.ResUser, error)
+	GetUserById(id *api.UserId) (*api.ResUser, error)
+	DeleteUserById(id *api.UserId) (*api.DeleteUserRes, error)
 }
 
 type userService struct {
@@ -26,7 +27,7 @@ func NewUserService() UserService {
 		client: api.NewUserServiceClient(cnn),
 	}
 }
-func (u userService) CreateUser(user *api.User) *api.ResUser {
+func (u userService) CreateUser(user *api.User) (*api.ResUser, error) {
 
 	ctx := context.Background()
 
@@ -38,7 +39,11 @@ func (u userService) CreateUser(user *api.User) *api.ResUser {
 	// ctx = metadata.NewOutgoingContext(ctx, md)
 
 	var header, trailer metadata.MD // variable to store header and trailer
-	user2, _ := u.client.CreateUser(ctx, user, grpc.Header(&header), grpc.Trailer(&trailer))
+	user2, err := u.client.CreateUser(ctx, user, grpc.Header(&header), grpc.Trailer(&trailer))
+	if err != nil {
+		return nil, err
+	}
+
 	a, ok := header["msg"]
 
 	if ok {
@@ -54,11 +59,21 @@ func (u userService) CreateUser(user *api.User) *api.ResUser {
 	// 	fmt.Print(header.Get("msg")[0]) // Read metadata sent by server
 	// }
 
-	return user2
+	return user2, nil
 }
-func (u userService) GetUserById(id *api.UserId) *api.ResUser {
+func (u userService) GetUserById(id *api.UserId) (*api.ResUser, error) {
 	ctx := context.Background()
 	fmt.Print(id)
-	user, _ := u.client.GetUser(ctx, id)
-	return user
+	user, err := u.client.GetUser(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+func (u userService) DeleteUserById(id *api.UserId) (*api.DeleteUserRes, error) {
+	res, err := u.client.DeleteUser(context.Background(), id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }

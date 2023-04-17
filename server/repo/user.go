@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	api "gitbub.com/eminoz/graceful-fiber/proto/pb"
 	"gitbub.com/eminoz/graceful-fiber/server/db"
@@ -13,6 +14,7 @@ import (
 type UserRepo interface {
 	InsertUser(ctx context.Context, user *api.User) (*api.ResUser, error)
 	GetUserById(id string) *api.ResUser
+	DeleteUserById(id string) (bool, error)
 }
 type userRepo struct {
 	DB *mongo.Database
@@ -50,4 +52,13 @@ func (u userRepo) GetUserById(id string) *api.ResUser {
 	u.Cl.FindOne(context.Background(), &filter).Decode(&usr)
 
 	return usr
+}
+func (u userRepo) DeleteUserById(id string) (bool, error) {
+	userId, _ := primitive.ObjectIDFromHex(id)
+	res, err := u.Cl.DeleteOne(context.Background(), bson.D{{Key: "_id", Value: userId}})
+	if err != nil {
+		return false, err
+	}
+	fmt.Println(res)
+	return true, nil
 }
