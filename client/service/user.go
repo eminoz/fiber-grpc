@@ -14,6 +14,7 @@ type UserService interface {
 	CreateUser(user *api.User) (*api.ResUser, error)
 	GetUserById(id *api.UserId) (*api.ResUser, error)
 	DeleteUserById(id *api.UserId) (*api.DeleteUserRes, error)
+	UpdateUserById(user *api.UpdateUser) (*api.ResUser, error)
 }
 
 type userService struct {
@@ -48,9 +49,8 @@ func (u userService) CreateUser(user *api.User) (*api.ResUser, error) {
 
 	if ok {
 
-		for i, v := range a {
+		for _, v := range a {
 			fmt.Print(v)
-			fmt.Print(i)
 
 		}
 	}
@@ -63,7 +63,6 @@ func (u userService) CreateUser(user *api.User) (*api.ResUser, error) {
 }
 func (u userService) GetUserById(id *api.UserId) (*api.ResUser, error) {
 	ctx := context.Background()
-	fmt.Print(id)
 	user, err := u.client.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
@@ -72,6 +71,13 @@ func (u userService) GetUserById(id *api.UserId) (*api.ResUser, error) {
 }
 func (u userService) DeleteUserById(id *api.UserId) (*api.DeleteUserRes, error) {
 	res, err := u.client.DeleteUser(context.Background(), id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+func (u userService) UpdateUserById(user *api.UpdateUser) (*api.ResUser, error) {
+	res, err := u.client.UpdateUserById(context.Background(), user)
 	if err != nil {
 		return nil, err
 	}

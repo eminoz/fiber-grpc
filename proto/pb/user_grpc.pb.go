@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
+	UpdateUserById(ctx context.Context, in *UpdateUser, opts ...grpc.CallOption) (*ResUser, error)
 	CreateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*ResUser, error)
 	GetUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*ResUser, error)
 	DeleteUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*DeleteUserRes, error)
@@ -33,6 +34,15 @@ type userServiceClient struct {
 
 func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
+}
+
+func (c *userServiceClient) UpdateUserById(ctx context.Context, in *UpdateUser, opts ...grpc.CallOption) (*ResUser, error) {
+	out := new(ResUser)
+	err := c.cc.Invoke(ctx, "/apiproto.UserService/UpdateUserById", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *userServiceClient) CreateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*ResUser, error) {
@@ -66,16 +76,19 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *UserId, opts ...
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
+	UpdateUserById(context.Context, *UpdateUser) (*ResUser, error)
 	CreateUser(context.Context, *User) (*ResUser, error)
 	GetUser(context.Context, *UserId) (*ResUser, error)
 	DeleteUser(context.Context, *UserId) (*DeleteUserRes, error)
-
 }
 
 // UnimplementedUserServiceServer must be embedded to have forward compatible implementations.
 type UnimplementedUserServiceServer struct {
 }
 
+func (UnimplementedUserServiceServer) UpdateUserById(context.Context, *UpdateUser) (*ResUser, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserById not implemented")
+}
 func (UnimplementedUserServiceServer) CreateUser(context.Context, *User) (*ResUser, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
@@ -96,6 +109,24 @@ type UnsafeUserServiceServer interface {
 
 func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
+}
+
+func _UserService_UpdateUserById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateUserById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/apiproto.UserService/UpdateUserById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateUserById(ctx, req.(*UpdateUser))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _UserService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -159,6 +190,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "apiproto.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "UpdateUserById",
+			Handler:    _UserService_UpdateUserById_Handler,
+		},
 		{
 			MethodName: "CreateUser",
 			Handler:    _UserService_CreateUser_Handler,

@@ -13,6 +13,7 @@ type UserService interface {
 	InsertUser(ctx context.Context, user *api.User) (*api.ResUser, error)
 	GetUserById(ctx context.Context, id string) *api.ResUser
 	DeleteUser(context.Context, *api.UserId) (*api.DeleteUserRes, error)
+	UpdateUserById(ctx context.Context, user *api.UpdateUser) (*api.ResUser, error)
 }
 type userService struct {
 	userservice repo.UserRepo
@@ -62,4 +63,12 @@ func (u userService) DeleteUser(ctx context.Context, userID *api.UserId) (*api.D
 		return &api.DeleteUserRes{Msg: "user could not delete", IsDeleted: res}, nil
 	}
 	return &api.DeleteUserRes{Msg: "user was deleted", IsDeleted: res}, nil
+}
+
+func (u userService) UpdateUserById(ctx context.Context, user *api.UpdateUser) (*api.ResUser, error) {
+	res, err := u.userservice.UpdateUserById(user)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }

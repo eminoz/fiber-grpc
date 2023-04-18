@@ -10,6 +10,7 @@ type UserApi interface {
 	CreateUser(ctx *fiber.Ctx) error
 	GetUserById(ctx *fiber.Ctx) error
 	DeleteUserById(ctx *fiber.Ctx) error
+	UpdateUserById(ctx *fiber.Ctx) error
 }
 type userApi struct {
 	userService service.UserService
@@ -41,6 +42,16 @@ func (u userApi) GetUserById(ctx *fiber.Ctx) error {
 func (u userApi) DeleteUserById(ctx *fiber.Ctx) error {
 	userID := ctx.Params("id")
 	res, err := u.userService.DeleteUserById(&api.UserId{Id: userID})
+	if err != nil {
+		return ctx.JSON(err)
+	}
+	return ctx.JSON(res)
+}
+func (u userApi) UpdateUserById(ctx *fiber.Ctx) error {
+	var user *api.UpdateUser
+
+	ctx.BodyParser(&user)
+	res, err := u.userService.UpdateUserById(user)
 	if err != nil {
 		return ctx.JSON(err)
 	}

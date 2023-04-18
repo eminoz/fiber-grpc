@@ -10,6 +10,12 @@ message User{
     string Surname=2;
     string Password=3;
 }
+message UpdateUser{
+    string Name=1;
+    string Surname=2;
+    string Password=4;
+    string id=3;
+}
 
 message ResUser{
     string Name=1;
@@ -25,6 +31,7 @@ message DeleteUserRes{
 }
   
 service UserService{
+    rpc UpdateUserById(UpdateUser) returns (ResUser);
      rpc CreateUser(User) returns (ResUser);
      rpc GetUser(UserId) returns (ResUser);
      rpc DeleteUser(UserId) returns (DeleteUserRes);
