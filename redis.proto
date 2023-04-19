@@ -1,37 +1,28 @@
 syntax = "proto3";
 
 
-option go_package = "api/";
+option go_package = "redisproto/";
 
-package apiproto;
+package redisproto;
 
 message User{
     string Name=1;
     string Surname=2;
-    string Password=3;
-}
-message UpdateUser{
-    string Name=1;
-    string Surname=2;
-    string Password=4;
-    string id=3;
-}
 
+}
 message ResUser{
     string Name=1;
     string Surname=2;
-}
-message UserId{
-    string id=3;
 }
 message DeleteUserRes{
     bool isDeleted=1;
     string msg=2;
 }
-  
+message UserId{
+    string id=3;
+}
 service UserService{
-    rpc UpdateUserById(UpdateUser) returns (ResUser);
-     rpc CreateUser(User) returns (ResUser);
+     rpc InsertUser(User) returns (ResUser);
      rpc GetUser(UserId) returns (ResUser);
      rpc DeleteUser(UserId) returns (DeleteUserRes);
 }
