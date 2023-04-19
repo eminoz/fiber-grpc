@@ -43,7 +43,9 @@ func (u userRepo) InsertUser(ctx context.Context, user *api.User) (*api.ResUser,
 
 	filter := bson.D{{Key: "_id", Value: id}}
 	u.Cl.FindOne(ctx, &filter).Decode(&usr)
-
+	userId, _ := id.(primitive.ObjectID)
+	idString := userId.Hex()
+	usr.Id = idString
 	return usr, nil
 
 }

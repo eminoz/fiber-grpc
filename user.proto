@@ -20,6 +20,7 @@ message UpdateUser{
 message ResUser{
     string Name=1;
     string Surname=2;
+    string Id=3;
 }
 message UserId{
     string id=3;

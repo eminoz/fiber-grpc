@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	InsertUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*ResUser, error)
+	InsertUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*InsertedUserRes, error)
 	GetUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*ResUser, error)
 	DeleteUser(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*DeleteUserRes, error)
 }
@@ -35,8 +35,8 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) InsertUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*ResUser, error) {
-	out := new(ResUser)
+func (c *userServiceClient) InsertUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*InsertedUserRes, error) {
+	out := new(InsertedUserRes)
 	err := c.cc.Invoke(ctx, "/redisproto.UserService/InsertUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *UserId, opts ...
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	InsertUser(context.Context, *User) (*ResUser, error)
+	InsertUser(context.Context, *User) (*InsertedUserRes, error)
 	GetUser(context.Context, *UserId) (*ResUser, error)
 	DeleteUser(context.Context, *UserId) (*DeleteUserRes, error)
 }
@@ -75,7 +75,7 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) InsertUser(context.Context, *User) (*ResUser, error) {
+func (UnimplementedUserServiceServer) InsertUser(context.Context, *User) (*InsertedUserRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InsertUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetUser(context.Context, *UserId) (*ResUser, error) {

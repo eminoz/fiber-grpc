@@ -6,6 +6,7 @@ import (
 
 	"gitbub.com/eminoz/graceful-fiber/client/config"
 	api "gitbub.com/eminoz/graceful-fiber/proto/pb"
+	redisproto "gitbub.com/eminoz/graceful-fiber/proto/redis"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -18,14 +19,16 @@ type UserService interface {
 }
 
 type userService struct {
-	client api.UserServiceClient
+	server api.UserServiceClient
+	redis  redisproto.UserServiceClient
 }
 
 func NewUserService() UserService {
-	cnn := config.GetConnection()
+	s, r := config.GetConnection()
 
 	return &userService{
-		client: api.NewUserServiceClient(cnn),
+		server: api.NewUserServiceClient(s),
+		redis:  redisproto.NewUserServiceClient(r),
 	}
 }
 func (u userService) CreateUser(user *api.User) (*api.ResUser, error) {
@@ -40,11 +43,12 @@ func (u userService) CreateUser(user *api.User) (*api.ResUser, error) {
 	// ctx = metadata.NewOutgoingContext(ctx, md)
 
 	var header, trailer metadata.MD // variable to store header and trailer
-	user2, err := u.client.CreateUser(ctx, user, grpc.Header(&header), grpc.Trailer(&trailer))
+	user2, err := u.server.CreateUser(ctx, user, grpc.Header(&header), grpc.Trailer(&trailer))
 	if err != nil {
 		return nil, err
 	}
-
+	newUser := redisproto.User{Name: user2.Name, Surname: user2.Surname, Id: user2.Id}
+	u.redis.InsertUser(ctx, &newUser)
 	a, ok := header["msg"]
 
 	if ok {
@@ -63,21 +67,21 @@ func (u userService) CreateUser(user *api.User) (*api.ResUser, error) {
 }
 func (u userService) GetUserById(id *api.UserId) (*api.ResUser, error) {
 	ctx := context.Background()
-	user, err := u.client.GetUser(ctx, id)
+	user, err := u.server.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 func (u userService) DeleteUserById(id *api.UserId) (*api.DeleteUserRes, error) {
-	res, err := u.client.DeleteUser(context.Background(), id)
+	res, err := u.server.DeleteUser(context.Background(), id)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 func (u userService) UpdateUserById(user *api.UpdateUser) (*api.ResUser, error) {
-	res, err := u.client.UpdateUserById(context.Background(), user)
+	res, err := u.server.UpdateUserById(context.Background(), user)
 	if err != nil {
 		return nil, err
 	}

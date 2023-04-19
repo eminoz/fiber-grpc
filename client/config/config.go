@@ -4,15 +4,21 @@ import (
 	"google.golang.org/grpc"
 )
 
-var connection *grpc.ClientConn
+var redisConnection *grpc.ClientConn
+var serverConnection *grpc.ClientConn
 
 func SetupConfig() {
-	conn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
+	sconn, err := grpc.Dial("localhost:4040", grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}
-	connection = conn
+	rconn, err := grpc.Dial("localhost:4043", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	redisConnection = rconn
+	serverConnection = sconn
 }
-func GetConnection() *grpc.ClientConn {
-	return connection
+func GetConnection() (*grpc.ClientConn, *grpc.ClientConn) {
+	return serverConnection, redisConnection
 }

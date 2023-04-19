@@ -8,7 +8,7 @@ package redisproto;
 message User{
     string Name=1;
     string Surname=2;
-
+    string Id=3;
 }
 message ResUser{
     string Name=1;
@@ -18,11 +18,15 @@ message DeleteUserRes{
     bool isDeleted=1;
     string msg=2;
 }
+message InsertedUserRes{
+    bool isInsert=1;
+    string msg=2;
+}
 message UserId{
     string id=3;
 }
 service UserService{
-     rpc InsertUser(User) returns (ResUser);
+     rpc InsertUser(User) returns (InsertedUserRes);
      rpc GetUser(UserId) returns (ResUser);
      rpc DeleteUser(UserId) returns (DeleteUserRes);
 }
