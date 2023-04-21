@@ -22,19 +22,19 @@ func (r redisUserApi) InsertUser(ctx context.Context, user *redisproto.User) (*r
 	if err != nil {
 		return nil, err
 	}
-	return &res, nil
+	return res, nil
 }
 func (r redisUserApi) GetUser(ctx context.Context, id *redisproto.UserId) (*redisproto.ResUser, error) {
 	res, err := r.userService.GetUserById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return &res, nil
+	return res, nil
 }
 func (r redisUserApi) DeleteUser(ctx context.Context, id *redisproto.UserId) (*redisproto.DeleteUserRes, error) {
 	res, err := r.userService.DeleteUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return &res, nil
+	return res, nil
 }

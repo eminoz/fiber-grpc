@@ -67,6 +67,12 @@ func (u userService) CreateUser(user *api.User) (*api.ResUser, error) {
 }
 func (u userService) GetUserById(id *api.UserId) (*api.ResUser, error) {
 	ctx := context.Background()
+	userID := redisproto.UserId{Id: id.Id}
+	res, _ := u.redis.GetUser(ctx, &userID)
+	if res.Name != "" {
+
+		return &api.ResUser{Name: res.Name, Surname: res.Surname, Id: res.Id}, nil
+	}
 	user, err := u.server.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
@@ -78,10 +84,22 @@ func (u userService) DeleteUserById(id *api.UserId) (*api.DeleteUserRes, error) 
 	if err != nil {
 		return nil, err
 	}
+	userID := redisproto.UserId{Id: id.Id}
+	u.redis.DeleteUser(context.Background(), &userID)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if resredis.IsDeleted {
+	// 	return &api.DeleteUserRes{IsDeleted: resredis.IsDeleted, Msg: resredis.Msg}, nil
+	// }
 	return res, nil
 }
 func (u userService) UpdateUserById(user *api.UpdateUser) (*api.ResUser, error) {
-	res, err := u.server.UpdateUserById(context.Background(), user)
+	ctx := context.Background()
+	res, err := u.server.UpdateUserById(ctx, user)
+	fmt.Print(res)
+	newUser := redisproto.User{Name: res.Name, Surname: res.Surname, Id: res.Id}
+	u.redis.InsertUser(ctx, &newUser)
 	if err != nil {
 		return nil, err
 	}

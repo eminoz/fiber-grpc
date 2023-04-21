@@ -79,8 +79,11 @@ func (u userRepo) UpdateUserById(user *api.UpdateUser) (*api.ResUser, error) {
 	}
 	if updated.ModifiedCount == 1 {
 		var usr *api.ResUser
+
 		u.Cl.FindOne(context.Background(), &filter).Decode(&usr)
+		usr.Id = user.Id
 		return usr, nil
+
 	}
 	return &api.ResUser{}, nil
 

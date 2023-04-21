@@ -9,9 +9,9 @@ import (
 )
 
 type UserService interface {
-	InserUser(ctx context.Context, user *redisproto.User) (redisproto.InsertedUserRes, error)
-	GetUserById(ctx context.Context, userId *redisproto.UserId) (redisproto.ResUser, error)
-	DeleteUser(ctx context.Context, userId *redisproto.UserId) (redisproto.DeleteUserRes, error)
+	InserUser(ctx context.Context, user *redisproto.User) (*redisproto.InsertedUserRes, error)
+	GetUserById(ctx context.Context, userId *redisproto.UserId) (*redisproto.ResUser, error)
+	DeleteUser(ctx context.Context, userId *redisproto.UserId) (*redisproto.DeleteUserRes, error)
 }
 
 type userService struct {
@@ -28,23 +28,31 @@ func NewUserService() UserService {
 		Redis: r,
 	}
 }
-func (u userService) InserUser(ctx context.Context, user *redisproto.User) (redisproto.InsertedUserRes, error) {
+func (u userService) InserUser(ctx context.Context, user *redisproto.User) (*redisproto.InsertedUserRes, error) {
 	jsonuser, err := json.Marshal(user)
 	if err != nil {
-		return redisproto.InsertedUserRes{}, err
+		return &redisproto.InsertedUserRes{}, err
 	}
 	res := u.Redis.HSet(ctx, "redisproto", user.Id, jsonuser)
 	if res.Val() != 1 {
-		return redisproto.InsertedUserRes{Msg: "could not insert", IsInsert: false}, err
+		return &redisproto.InsertedUserRes{Msg: "could not insert", IsInsert: false}, err
 	}
-	return redisproto.InsertedUserRes{Msg: "inserted", IsInsert: true}, nil
+	return &redisproto.InsertedUserRes{Msg: "inserted", IsInsert: true}, nil
 
 }
 
-func (u userService) GetUserById(ctx context.Context, userId *redisproto.UserId) (redisproto.ResUser, error) {
-	panic("not implemented") // TODO: Implement
+func (u userService) GetUserById(ctx context.Context, userId *redisproto.UserId) (*redisproto.ResUser, error) {
+	res := u.Redis.HGet(ctx, "redisproto", userId.Id)
+	var user redisproto.ResUser
+	json.Unmarshal([]byte(res.Val()), &user)
+	return &user, nil
 }
 
-func (u userService) DeleteUser(ctx context.Context, userId *redisproto.UserId) (redisproto.DeleteUserRes, error) {
-	panic("not implemented") // TODO: Implement
+func (u userService) DeleteUser(ctx context.Context, userId *redisproto.UserId) (*redisproto.DeleteUserRes, error) {
+	res := u.Redis.HDel(ctx, "redisproto", userId.Id)
+	if res.Val() == 1 {
+
+		return &redisproto.DeleteUserRes{IsDeleted: true, Msg: "user deleted from redis"}, nil
+	}
+	return &redisproto.DeleteUserRes{}, nil
 }

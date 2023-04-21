@@ -13,6 +13,7 @@ message User{
 message ResUser{
     string Name=1;
     string Surname=2;
+    string id=3;
 }
 message DeleteUserRes{
     bool isDeleted=1;
